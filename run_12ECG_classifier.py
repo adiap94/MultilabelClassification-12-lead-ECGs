@@ -179,17 +179,20 @@ def run_12ECG_classifier(data, header_data, model):
 
     return current_label, current_score, classes
 
-def load_12ECG_model(model_input):
+def load_12ECG_model(model_input,device):
     # load the model from disk
+    model_list = [os.path.join(model_input , f) for f in os.listdir(model_input) if f.lower().endswith("pth")]
+    model_list = sorted(model_list, key=lambda x: os.path.basename(x).split("-")[-1], reverse=False)
+
     # load the model from disk
-    model_list = ['./load_model/48-0.6740-split0.pth',
-                  './load_model/42-0.6701-split1.pth',
-                  './load_model/40-0.6777-split2.pth',
-                  './load_model/42-0.6749-split3.pth',
-                  './load_model/47-0.6791-split4.pth']
-    for i in range(5):
-        shutil.copy(model_list[i], model_input)
-    model_list = lsdir(rootdir=model_input, suffix=".pth")
+    # model_list = ['./load_model/48-0.6740-split0.pth',
+    #               './load_model/42-0.6701-split1.pth',
+    #               './load_model/40-0.6777-split2.pth',
+    #               './load_model/42-0.6749-split3.pth',
+    #               './load_model/47-0.6791-split4.pth']
+    # for i in range(5):
+    #     shutil.copy(model_list[i], model_input)
+    # model_list = lsdir(rootdir=model_input, suffix=".pth")
     split_list = ['split0', 'split1', 'split2', 'split3', 'split4']
     resumes = []
     for split in split_list:
@@ -202,13 +205,13 @@ def load_12ECG_model(model_input):
     for resume in resumes:
         model = getattr(models, 'seresnet18_1d_ag')(in_channel=12, out_channel=24)
         # Consider the gpu or cpu condition
-        if torch.cuda.is_available():
-            if device_count > 1:
-                model = torch.nn.DataParallel(model)
-            model.load_state_dict(torch.load(resume))
-        else:
-            model.load_state_dict(torch.load(resume, map_location=device))
-
+        # if torch.cuda.is_available():
+        #     if device_count > 1:
+        #         model = torch.nn.DataParallel(model)
+        #     model.load_state_dict(torch.load(resume))
+        # else:
+        #     model.load_state_dict(torch.load(resume, map_location=device))
+        model.load_state_dict(torch.load(resume, map_location=device))
         model.to(device)
         model.eval()
         model_all.append(model)

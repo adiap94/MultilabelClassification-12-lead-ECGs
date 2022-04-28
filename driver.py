@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import torch
 import numpy as np, os, sys
 from scipy.io import loadmat
 from run_12ECG_classifier import load_12ECG_model, run_12ECG_classifier
@@ -37,6 +37,9 @@ def save_challenge_predictions(output_directory,filename,scores,labels,classes):
 
 
 if __name__ == '__main__':
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    device = torch.device("cuda:0")
+
     # Parse arguments.
     if len(sys.argv) != 4:
         raise Exception('Include the input and output directories as arguments, e.g., python driver.py input output.')
@@ -54,13 +57,15 @@ if __name__ == '__main__':
     for f in os.listdir(input_directory):
         if os.path.isfile(os.path.join(input_directory, f)) and not f.lower().startswith('.') and f.lower().endswith('mat'):
             input_files.append(f)
+    # debug
+    input_files = input_files[:2]
 
     if not os.path.isdir(output_directory):
         os.mkdir(output_directory)
 
     # Load model.
     print('Loading 12ECG model...')
-    model = load_12ECG_model(model_input)
+    model = load_12ECG_model(model_input,device)
 
     # Iterate over files.
     print('Extracting 12ECG features...')
