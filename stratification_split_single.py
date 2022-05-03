@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+# from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 from tqdm import tqdm
 
 
@@ -58,21 +58,21 @@ def get_class_pair(input_directory_name, CT_codes_all, files, class_df):
     class_df = class_df.drop(class_df.index[i + 1:])
     return class_df
 
-
-def data_split(df, labels, n_split):
-    X = np.arange(labels.shape[0])
-    mskf = MultilabelStratifiedKFold(n_splits=n_split, random_state=2020, shuffle=True)
-
-    split_index_list = []
-    for train_index, test_index in mskf.split(X, labels):
-        split_index_list.append([train_index, test_index])
-    train_csv = []
-    test_csv = []
-    for i in range(n_split):
-        train_csv.append(df.iloc[split_index_list[i][0], :])
-        test_csv.append(df.iloc[split_index_list[i][1], :])
-
-    return train_csv, test_csv
+#
+# def data_split(df, labels, n_split):
+#     X = np.arange(labels.shape[0])
+#     mskf = MultilabelStratifiedKFold(n_splits=n_split, random_state=2020, shuffle=True)
+#
+#     split_index_list = []
+#     for train_index, test_index in mskf.split(X, labels):
+#         split_index_list.append([train_index, test_index])
+#     train_csv = []
+#     test_csv = []
+#     for i in range(n_split):
+#         train_csv.append(df.iloc[split_index_list[i][0], :])
+#         test_csv.append(df.iloc[split_index_list[i][1], :])
+#
+#     return train_csv, test_csv
 
 
 def read_and_split_data(data_directory):

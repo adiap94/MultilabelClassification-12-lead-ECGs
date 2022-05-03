@@ -10,40 +10,44 @@ import shutil
 # debug
 from stratification_split_single import read_and_split_data, prepare_datacsv
 
-def train_12ECG_classifier(input_directory, output_directory):
-    model_list = ['./load_model/48-0.6740-split0.pth',
-                  './load_model/42-0.6701-split1.pth',
-                  './load_model/40-0.6777-split2.pth',
-                  './load_model/42-0.6749-split3.pth',
-                  './load_model/47-0.6791-split4.pth']
-    for i in range(5):
-        shutil.copy(model_list[i], output_directory)
-    split_list = ['0', '1', '2', '3', '4']
+def train_12ECG_classifier():
+    # model_list = ['./load_model/48-0.6740-split0.pth',
+    #               './load_model/42-0.6701-split1.pth',
+    #               './load_model/40-0.6777-split2.pth',
+    #               './load_model/42-0.6749-split3.pth',
+    #               './load_model/47-0.6791-split4.pth']
+    # for i in range(5):
+    #     shutil.copy(model_list[i], output_directory)
+    # split_list = ['0', '1', '2', '3', '4']
 
     # read and split the data
-    prepare_datacsv(input_directory)
+    # prepare_datacsv(input_directory)
     #os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_device.strip()
-    # Prepare the saving path for the model
+    # # Prepare the saving path for the model
+    # save_dir = output_directory
+    # if not os.path.exists(save_dir):
+    #     os.makedirs(save_dir)
+
+    # for i in range(5):
+    args = parse_args()
+    output_directory = args.output_directory
     save_dir = output_directory
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+    # args.data_dir = input_directory
+    args.split = '5'
+    # shutil.copy(model_list[i], output_directory)
+    # args.load_model = model_list[i]
+    # set the logger
+    setlogger(os.path.join(save_dir, 'train'+args.split+'.log'))
 
-    for i in range(5):
-        args = parse_args()
-        args.data_dir = input_directory
-        args.split = split_list[i]
-        shutil.copy(model_list[i], output_directory)
-        args.load_model = model_list[i]
-        # set the logger
-        setlogger(os.path.join(save_dir, 'train'+args.split+'.log'))
+    # save the args
+    for k, v in args.__dict__.items():
+        logging.info("{}: {}".format(k, v))
 
-        # save the args
-        for k, v in args.__dict__.items():
-            logging.info("{}: {}".format(k, v))
-
-        trainer = train_utils(args, save_dir)
-        trainer.setup()
-        trainer.train()
+    trainer = train_utils(args, save_dir)
+    trainer.setup()
+    trainer.train()
 
 
 
@@ -53,6 +57,9 @@ def parse_args():
 
     # basic parameters
     parser.add_argument('--model_name', type=str, default='seresnet18_1d_ag', help='the name of the model')
+    parser.add_argument('--output_directory', type=str, default='/tcmldrive/project_dl/results')
+    parser.add_argument('--train_data_csv', type=str, default='/tcmldrive/project_dl/db/train_split5.csv')
+    parser.add_argument('--val_data_csv', type=str, default='/tcmldrive/project_dl/db/val_split5.csv')
     parser.add_argument('--data_name', type=str, default='ECGag', help='the name of the data')
     parser.add_argument('--data_dir', type=str, default='./', help='the directory of the data')
     parser.add_argument('--split', type=str, default='0', help='The number of split')
