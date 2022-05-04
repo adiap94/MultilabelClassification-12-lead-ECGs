@@ -56,7 +56,7 @@ def main(run_dir,gpu_num = "0"):
     input_files = df.mat_path.to_list()
 
     # debug
-    input_files = input_files[:2]
+    # input_files = input_files[:2]
 
     if not os.path.isdir(output_directory):
         os.mkdir(output_directory)
