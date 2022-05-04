@@ -109,8 +109,7 @@ def output_label(logits_prob, threshold, num_classes):
     return score_tmp, pred_label
 
 def run_12ECG_classifier(data, header_data, model):
-    weight_list = ['./magic_weight0.npz', './magic_weight1.npz', './magic_weight2.npz',
-                   './magic_weight3.npz', './magic_weight4.npz']
+    weight_list = './magic_weight4.npz'
     num_classes = 24
     tar_fs = 257
     src_fs = int(header_data[0].split(' ')[2].strip())
@@ -133,34 +132,34 @@ def run_12ECG_classifier(data, header_data, model):
         start = int((val_length - win_length) / (patch_number - 1))
     score = 0
     combined_label = 0
-    for j in range(len(model)):
-        model_one = model[j]
-        for i in range(patch_number):
-            if i == 0:
-                logit = model_one(inputs[:, :, 0: val_length], ag)
-                logits_prob = m(logit)
-            elif i == patch_number - 1:
-                logit = model_one(inputs[:, :, val_length - win_length: val_length], ag)
-                logits_prob_tmp = m(logit)
-                logits_prob = (logits_prob + logits_prob_tmp) / patch_number
-            else:
-                logit = model_one(inputs[:, :, i * start:i * start + win_length], ag)
-                logits_prob_tmp = m(logit)
-                logits_prob = logits_prob + logits_prob_tmp
+    # for j in range(len(model)):
+    model_one = model
+    for i in range(patch_number):
+        if i == 0:
+            logit = model_one(inputs[:, :, 0: val_length], ag)
+            logits_prob = m(logit)
+        elif i == patch_number - 1:
+            logit = model_one(inputs[:, :, val_length - win_length: val_length], ag)
+            logits_prob_tmp = m(logit)
+            logits_prob = (logits_prob + logits_prob_tmp) / patch_number
+        else:
+            logit = model_one(inputs[:, :, i * start:i * start + win_length], ag)
+            logits_prob_tmp = m(logit)
+            logits_prob = logits_prob + logits_prob_tmp
 
-        # using the threshold to check each model
-        A = np.load(weight_list[j])
-        threshold = A['arr_0']
-        score_tmp, pred_label = output_label(logits_prob, threshold, num_classes)
+    # using the threshold to check each model
+    A = np.load(weight_list)
+    threshold = A['arr_0']
+    score_tmp, pred_label = output_label(logits_prob, threshold, num_classes)
 
-        # the label
-        combined_label = combined_label + pred_label
+    # the label
+    combined_label = combined_label + pred_label
 
-        # The probability
-        score = score + score_tmp
+    # The probability
+    score = score + score_tmp
 
-    score = score / len(model)
-    combined_label = combined_label / len(model)
+    score = score
+    combined_label = combined_label
     max_index = np.argmax(combined_label, 1)
     combined_label[0, max_index] = 1
     threshold_tmp = 0.5
@@ -179,44 +178,13 @@ def run_12ECG_classifier(data, header_data, model):
 
     return current_label, current_score, classes
 
-def load_12ECG_model(model_input,device):
-    # load the model from disk
-    model_list = [os.path.join(model_input , f) for f in os.listdir(model_input) if f.lower().endswith("pth")]
-    model_list = sorted(model_list, key=lambda x: os.path.basename(x).split("-")[-1], reverse=False)
+def load_12ECG_model(model_path,device):
+    model = getattr(models, 'seresnet18_1d_ag')(in_channel=12, out_channel=24)
 
-    # load the model from disk
-    # model_list = ['./load_model/48-0.6740-split0.pth',
-    #               './load_model/42-0.6701-split1.pth',
-    #               './load_model/40-0.6777-split2.pth',
-    #               './load_model/42-0.6749-split3.pth',
-    #               './load_model/47-0.6791-split4.pth']
-    # for i in range(5):
-    #     shutil.copy(model_list[i], model_input)
-    # model_list = lsdir(rootdir=model_input, suffix=".pth")
-    split_list = ['split0', 'split1', 'split2', 'split3', 'split4']
-    resumes = []
-    for split in split_list:
-        sub_list = [i for i in model_list if split in i]
-        accuracy = np.array([float(i.split('-')[-2]) for i in sub_list])
-        resumes.append(sub_list[int(np.argmax(accuracy))])
-
-    model_all = []
-
-    for resume in resumes:
-        model = getattr(models, 'seresnet18_1d_ag')(in_channel=12, out_channel=24)
-        # Consider the gpu or cpu condition
-        # if torch.cuda.is_available():
-        #     if device_count > 1:
-        #         model = torch.nn.DataParallel(model)
-        #     model.load_state_dict(torch.load(resume))
-        # else:
-        #     model.load_state_dict(torch.load(resume, map_location=device))
-        model.load_state_dict(torch.load(resume, map_location=device))
-        model.to(device)
-        model.eval()
-        model_all.append(model)
-
-    return model_all
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.to(device)
+    model.eval()
+    return model
 
 
 def lsdir(rootdir="", suffix=".png"):

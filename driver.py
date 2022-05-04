@@ -3,6 +3,9 @@ import torch
 import numpy as np, os, sys
 from scipy.io import loadmat
 from run_12ECG_classifier import load_12ECG_model, run_12ECG_classifier
+from collections import namedtuple
+import utiles
+import pandas as pd
 
 def load_challenge_data(filename):
 
@@ -20,9 +23,9 @@ def load_challenge_data(filename):
 
 
 def save_challenge_predictions(output_directory,filename,scores,labels,classes):
-
-    recording = os.path.splitext(filename)[0]
-    new_file = filename.replace('.mat','.csv')
+    basename = os.path.basename(filename)
+    recording = os.path.splitext(basename)[0]
+    new_file = basename.replace('.mat','.csv')
     output_file = os.path.join(output_directory,new_file)
 
     # Include the filename as the recording number
@@ -34,29 +37,24 @@ def save_challenge_predictions(output_directory,filename,scores,labels,classes):
     with open(output_file, 'w') as f:
         f.write(recording_string + '\n' + class_string + '\n' + label_string + '\n' + score_string + '\n')
 
+def main(run_dir,gpu_num = "0"):
 
+    config_path = os.path.join(run_dir,"config.json")
+    args = utiles.json_load(config_path)
+    args = namedtuple('Struct', args.keys())(*args.values())
 
-if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    model_list = [os.path.join(run_dir,"Models",p) for p in os.listdir(os.path.join(run_dir,"Models"))]
+    model_path = model_list[-1]
+
+    output_directory = os.path.join(run_dir,"test")
+
+    #define gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = gpu_num
     device = torch.device("cuda:0")
 
-    # Parse arguments.
-    if len(sys.argv) != 4:
-        raise Exception('Include the input and output directories as arguments, e.g., python driver.py input output.')
+    df = pd.read_csv(args.test_data_csv)
+    input_files = df.mat_path.to_list()
 
-    model_input = sys.argv[1]
-    input_directory = sys.argv[2]
-    output_directory = sys.argv[3]
-    """
-    model_input = './checkpoint_seresnet18_clip_weighted_1d_split0'
-    input_directory = '../Training_WFDB'
-    output_directory = '../results'
-    """
-    # Find files.
-    input_files = []
-    for f in os.listdir(input_directory):
-        if os.path.isfile(os.path.join(input_directory, f)) and not f.lower().startswith('.') and f.lower().endswith('mat'):
-            input_files.append(f)
     # debug
     input_files = input_files[:2]
 
@@ -65,7 +63,7 @@ if __name__ == '__main__':
 
     # Load model.
     print('Loading 12ECG model...')
-    model = load_12ECG_model(model_input,device)
+    model = load_12ECG_model(model_path,device)
 
     # Iterate over files.
     print('Extracting 12ECG features...')
@@ -73,7 +71,7 @@ if __name__ == '__main__':
 
     for i, f in enumerate(input_files):
         print('    {}/{}...'.format(i+1, num_files))
-        tmp_input_file = os.path.join(input_directory,f)
+        tmp_input_file = f
         data,header_data = load_challenge_data(tmp_input_file)
         current_label, current_score, classes = run_12ECG_classifier(data, header_data, model)
         # Save results.
@@ -81,3 +79,7 @@ if __name__ == '__main__':
 
 
     print('Done.')
+if __name__ == '__main__':
+
+    main(run_dir = "/tcmldrive/project_dl/results/restore/" )
+    pass
