@@ -18,7 +18,7 @@ our_db = pd.read_csv(our_db)
 
 train_db["basename"]=train_db.filename.apply(lambda x : os.path.basename(x))
 val_db["basename"]=val_db.filename.apply(lambda x : os.path.basename(x))
-our_db["basename"]=our_db.mat_path.apply(lambda x : os.path.basename(x))
+our_db["basename"]=our_db.filename.apply(lambda x : os.path.basename(x))
 
 train_files = train_db.basename.to_list()
 our_db.loc[our_db.basename.isin(train_files),"indicator"]= 1

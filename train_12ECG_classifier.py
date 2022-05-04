@@ -84,9 +84,12 @@ def parse_args():
     parser.add_argument('--steps', type=str, default='2', help='the learning rate decay for step and stepLR')
 
     # save, load and display information
-    parser.add_argument('--load_model', type=str, default='./load_model/48-0.6294-best_model.pth', help='the directory of the resume training model')
+    # parser.add_argument('--load_model', type=str, default='./load_model/48-0.6294-best_model.pth', help='the directory of the resume training model')
+    parser.add_argument('--load_model', type=str, default=None, help='the directory of the resume training model')
+
     parser.add_argument('--max_epoch', type=int, default=4, help='max number of epoch')
     parser.add_argument('--print_step', type=int, default=200, help='the interval of log training information')
+    parser.add_argument('--debug_mode', type=bool, default=False)
 
     args, _ = parser.parse_known_args()
     return args

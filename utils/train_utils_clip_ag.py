@@ -59,7 +59,7 @@ class train_utils(object):
         # Load the datasets
         Dataset = getattr(datasets, args.data_name)
         self.datasets = {}
-        self.datasets['train'], self.datasets['val'] = Dataset(args.data_dir, args.split).data_preprare()
+        self.datasets['train'], self.datasets['val'] = Dataset(args).data_preprare()
         self.dataloaders = {
             x: torch.utils.data.DataLoader(self.datasets[x], batch_size=(args.batch_size if x == 'train' else 1),
                                            shuffle=(True if x == 'train' else False),

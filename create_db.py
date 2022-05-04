@@ -81,7 +81,6 @@ def main(source_dir,out_dir):
 
     print("finish creating db")
     print("sava db to: " + os.path.join(out_dir,"db.csv"))
-
 if __name__ == '__main__':
     dx_mapping_scored_path ="/tcmldrive/project_dl/code/adi/utils/dx_mapping_scored.csv"
     out_dir = "/tcmldrive/project_dl/db/"

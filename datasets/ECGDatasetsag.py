@@ -62,11 +62,12 @@ class dataset(Dataset):
     def __init__(self, anno_pd, test=False, transform=None, data_dir=None, loader=load_data):
         self.test = test
         if self.test:
-            self.data = anno_pd['filename'].tolist()
+            self.data = anno_pd['mat_path'].tolist()
             self.fs = anno_pd['fs'].tolist()
         else:
-            self.data = anno_pd['filename'].tolist()
-            labels = anno_pd.iloc[:, 4:].values
+            self.data = anno_pd['mat_path'].tolist()
+            labels = anno_pd.iloc[:, 6:30].values
+            # labels = anno_pd.iloc[:, 4:].values
             self.multi_labels = [labels[i, :] for i in range(labels.shape[0])]
             self.age = anno_pd['age'].tolist()
             self.gender = anno_pd['gender'].tolist()
