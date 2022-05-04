@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 import argparse
 import os
-from datetime import datetime
+from collections import namedtuple
 from utils.logger import setlogger
 import logging
 from utils.train_utils_clip_ag import train_utils
-import torch
-import shutil
-# debug
-from stratification_split_single import read_and_split_data, prepare_datacsv
+import utiles
+
 
 def train_12ECG_classifier():
+    # Load Configuration File
+    work_dir = utiles.create_working_folder()
+    json_config_file_path = os.path.join(work_dir, 'config.json')
+    args = utiles.json_load(json_config_file_path)
+    args = namedtuple('Struct', args.keys())(*args.values())
     # model_list = ['./load_model/48-0.6740-split0.pth',
     #               './load_model/42-0.6701-split1.pth',
     #               './load_model/40-0.6777-split2.pth',
@@ -29,23 +32,23 @@ def train_12ECG_classifier():
     #     os.makedirs(save_dir)
 
     # for i in range(5):
-    args = parse_args()
-    output_directory = args.output_directory
-    save_dir = output_directory
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    # args = parse_args()
+    # output_directory = args.output_directory
+    # save_dir = output_directory
+    # if not os.path.exists(save_dir):
+    #     os.makedirs(save_dir)
     # args.data_dir = input_directory
-    args.split = '5'
+    # args.split = '5'
     # shutil.copy(model_list[i], output_directory)
     # args.load_model = model_list[i]
     # set the logger
-    setlogger(os.path.join(save_dir, 'train'+args.split+'.log'))
+    setlogger(os.path.join(args.workdir, 'train.log'))
 
     # save the args
-    for k, v in args.__dict__.items():
-        logging.info("{}: {}".format(k, v))
+    # for k, v in args.__dict__.items():
+    #     logging.info("{}: {}".format(k, v))
 
-    trainer = train_utils(args, save_dir)
+    trainer = train_utils(args)
     trainer.setup()
     trainer.train()
 

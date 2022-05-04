@@ -1,0 +1,25 @@
+{
+    "model_name": "seresnet18_1d_ag",
+	"output_directory": "/tcmldrive/project_dl/results",
+	"train_data_csv" : "/tcmldrive/project_dl/db/train_split5.csv",
+	"val_data_csv" : "/tcmldrive/project_dl/db/val_split5.csv",
+	"test_data_csv" : "/tcmldrive/project_dl/db/test_split5.csv",
+	"data_name": "ECGag",
+	"monitor_acc" : "ecgAcc",
+	"batch_size" : 2,
+	"num_workers" :0,
+	"opt":"sgd",
+	"lr":0.0003,
+	"momentum":0.9,
+	"weight_decay":1e-5,
+	"lr_scheduler": "step",
+    "gamma": 0.1,
+	"steps":"2",
+    "load_model": null,
+    "load_model_bool": false,
+	"print_step" : 200,
+    "gpu": "1",
+    "max_epoch": 4,
+	"debug_mode":true
+
+}

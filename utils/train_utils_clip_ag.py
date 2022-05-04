@@ -32,9 +32,9 @@ def nn_forward(model, sigmoid, criterion, inputs, ag, labels):
 
 
 class train_utils(object):
-    def __init__(self, args, save_dir):
+    def __init__(self, args):
         self.args = args
-        self.save_dir = save_dir
+        # self.save_dir = save_dir
 
     def setup(self):
         """
@@ -75,8 +75,8 @@ class train_utils(object):
         # self.model.fc = torch.nn.Linear(self.model.fc.in_features, Dataset.num_classes)
         # parameter_list = self.model.parameter_list(args.lr)
 
-        if args.layer_num_last != 0:
-            set_freeze_by_id(self.model, args.layer_num_last)
+        # if args.layer_num_last != 0:
+        #     set_freeze_by_id(self.model, args.layer_num_last)
         if self.device_count > 1:
             self.model = torch.nn.DataParallel(self.model)
 
@@ -269,7 +269,7 @@ class train_utils(object):
                         logging.info("save best model epoch {}, CM: {:.4f}".
                                      format(epoch, challenge_metric))
                         torch.save(model_state_dic,
-                                   os.path.join(self.save_dir, '{}-{:.4f}-split{}.pth'.format(epoch, best_acc, args.split)))
+                                   os.path.join(self.args.workdir,"Models", '{}-{:.4f}-split.pth'.format(epoch, best_acc)))
 
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
