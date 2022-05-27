@@ -122,7 +122,7 @@ class train_utils(object):
 
         # Load the checkpoint
         self.start_epoch = 0
-        if args.load_model is not None:
+        if args.load_model_bool:
             print('load the model:' + args.load_model)
             self.model.load_state_dict(torch.load(args.load_model))
 
