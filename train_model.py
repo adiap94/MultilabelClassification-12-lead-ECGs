@@ -3,20 +3,13 @@
 import os, sys
 from train_12ECG_classifier import train_12ECG_classifier
 
-if __name__ == '__main__':
-    # Parse arguments.
-    # test
-    # input_directory = sys.argv[1]
-    # output_directory = sys.argv[2]
-    """
-    input_directory = '../Data'
-    output_directory = './Test_Codes'
-    """
-    # if not os.path.isdir(output_directory):
-    #     os.mkdir(output_directory)
+def main():
 
     print('Running training code...')
 
     train_12ECG_classifier()
 
     print('Done.')
+if __name__ == '__main__':
+    main()
+    pass

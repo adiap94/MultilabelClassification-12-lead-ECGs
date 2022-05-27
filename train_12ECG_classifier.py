@@ -6,7 +6,7 @@ from utils.logger import setlogger
 import logging
 from utils.train_utils_clip_ag import train_utils
 import utiles
-
+import torch
 
 def train_12ECG_classifier():
     # Load Configuration File
@@ -14,40 +14,11 @@ def train_12ECG_classifier():
     json_config_file_path = os.path.join(work_dir, 'config.json')
     args = utiles.json_load(json_config_file_path)
     args = namedtuple('Struct', args.keys())(*args.values())
-    # model_list = ['./load_model/48-0.6740-split0.pth',
-    #               './load_model/42-0.6701-split1.pth',
-    #               './load_model/40-0.6777-split2.pth',
-    #               './load_model/42-0.6749-split3.pth',
-    #               './load_model/47-0.6791-split4.pth']
-    # for i in range(5):
-    #     shutil.copy(model_list[i], output_directory)
-    # split_list = ['0', '1', '2', '3', '4']
+    #define gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+    device = torch.device("cuda:0")
 
-    # read and split the data
-    # prepare_datacsv(input_directory)
-    #os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_device.strip()
-    # # Prepare the saving path for the model
-    # save_dir = output_directory
-    # if not os.path.exists(save_dir):
-    #     os.makedirs(save_dir)
-
-    # for i in range(5):
-    # args = parse_args()
-    # output_directory = args.output_directory
-    # save_dir = output_directory
-    # if not os.path.exists(save_dir):
-    #     os.makedirs(save_dir)
-    # args.data_dir = input_directory
-    # args.split = '5'
-    # shutil.copy(model_list[i], output_directory)
-    # args.load_model = model_list[i]
-    # set the logger
     setlogger(os.path.join(args.workdir, 'train.log'))
-
-    # save the args
-    # for k, v in args.__dict__.items():
-    #     logging.info("{}: {}".format(k, v))
-
     trainer = train_utils(args)
     trainer.setup()
     trainer.train()

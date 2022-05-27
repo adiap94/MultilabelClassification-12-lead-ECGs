@@ -35,7 +35,10 @@ class train_utils(object):
     def __init__(self, args):
         self.args = args
         # self.save_dir = save_dir
-
+        self.out_dir = args.workdir
+        self.csvLoggerFile_path = os.path.join(self.out_dir, "history.csv")
+        self.epoch_log = {}
+        self.best_metric = 0
     def setup(self):
         """
         Initialize the datasets, model, loss and optimizer
@@ -130,6 +133,19 @@ class train_utils(object):
         self.sigmoid.to(self.device)
         self.model.to(self.device)
 
+    def writeCSVLoggerFile(self):
+        df = pd.DataFrame([self.epoch_log])
+        with open(self.csvLoggerFile_path, 'a') as f:
+            df.to_csv(f, mode='a', header=f.tell() == 0, index=False)
+
+    def save_model_checkpoint(self):
+
+        if self.epoch_log["challenge_metric_val"] > self.best_metric:
+            self.best_metric = self.epoch_log["challenge_metric_val"]
+            PATH = os.path.join(self.out_dir, "Models", "best_metric_model.pt")
+            torch.save(self.model, PATH)
+            print("saved new best metric model")
+
     def train(self):
         """
         Training process
@@ -145,7 +161,8 @@ class train_utils(object):
         step_start = time.time()
 
         for epoch in range(self.start_epoch, args.max_epoch):
-
+            self.epoch_log = {}
+            self.epoch_log["epoch"] = epoch
             logging.info('-' * 5 + 'Epoch {}/{}'.format(epoch, args.max_epoch - 1) + '-' * 5)
             # Update the learning rate
             if self.lr_scheduler is not None:
@@ -256,26 +273,32 @@ class train_utils(object):
                 epoch_loss = epoch_loss / len(self.dataloaders[phase].dataset)
                 logging.info('Epoch: {} {}-Loss: {:.4f} {}-challenge_metric: {:.4f}, Cost {:.1f} sec'.
                              format(epoch, phase, epoch_loss, phase, challenge_metric, time.time() - epoch_start))
+
+                self.epoch_log["epoch_loss_"+phase] = epoch_loss
+                self.epoch_log["challenge_metric_"+phase] = challenge_metric
                 # This depends on the weights
                 epoch_acc = challenge_metric
 
                 # save the model
-                if phase == 'val':
-                    # save the checkpoint for other learning
-                    model_state_dic = self.model.module.state_dict() if self.device_count > 1 else self.model.state_dict()
-                    # save the best model according to the val accuracy
-                    if epoch_acc > best_acc:
-                        best_acc = epoch_acc
-                        logging.info("save best model epoch {}, CM: {:.4f}".
-                                     format(epoch, challenge_metric))
-                        torch.save(model_state_dic,
-                                   os.path.join(self.args.workdir,"Models", '{}-{:.4f}-split.pth'.format(epoch, best_acc)))
+                # if phase == 'val':
+                #     # save the checkpoint for other learning
+                #     model_state_dic = self.model.module.state_dict() if self.device_count > 1 else self.model.state_dict()
+                #     # save the best model according to the val accuracy
+                #     if epoch_acc > best_acc:
+                #         best_acc = epoch_acc
+                #         logging.info("save best model epoch {}, CM: {:.4f}".
+                #                      format(epoch, challenge_metric))
+                #         torch.save(model_state_dic,
+                #                    os.path.join(self.args.workdir,"Models", '{}-{:.4f}-split.pth'.format(epoch, best_acc)))
 
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
+            # update Logger File
+            self.writeCSVLoggerFile()
 
-
+            # save model checkpoint
+            self.save_model_checkpoint()
 
 
 

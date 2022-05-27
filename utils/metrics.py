@@ -4,7 +4,8 @@ import torch.nn.functional as F
 import models
 import numpy as np
 import pandas as pd
-
+import os
+import pandas as pd
 
 #计算F1score
 def cal_Acc(y_true, y_pre, threshold=0.5, num_classes=9, beta=2, normal=False):
@@ -53,15 +54,16 @@ def cal_Acc(y_true, y_pre, threshold=0.5, num_classes=9, beta=2, normal=False):
     return challenge_metric
 
 
-def evaluate_12ECG_score(label_directory, output_directory):
+def evaluate_12ECG_score(args, output_directory):#(label_directory, output_directory):
     # Define the weights, the SNOMED CT code for the normal class, and equivalent SNOMED CT codes.
-    weights_file = 'weights.csv'
+    weights_file = './utils/weights.csv'
     normal_class = '426783006'
     equivalent_classes = [['713427006', '59118001'], ['284470004', '63593006'], ['427172004', '17338001']]
 
     # Find the label and output files.
     print('Finding label and output files...')
-    label_files, output_files = find_challenge_files(label_directory, output_directory)
+
+    label_files, output_files = find_challenge_files(args, output_directory) #(label_directory, output_directory)
 
     # Load the labels and outputs.
     print('Loading labels and outputs...')
@@ -88,7 +90,7 @@ def evaluate_12ECG_score(label_directory, output_directory):
     print('Evaluating model...')
 
     print('- AUROC and AUPRC...')
-    auroc, auprc = compute_auc(labels, scalar_outputs)
+    auroc, auprc, sen, spe = compute_auc(labels, scalar_outputs)
 
     print('- Accuracy...')
     accuracy = compute_accuracy(labels, binary_outputs)
@@ -116,11 +118,14 @@ def is_number(x):
         return False
 
 # Find Challenge files.
-def find_challenge_files(label_directory, output_directory):
+def find_challenge_files(args, output_directory):#(label_directory, output_directory):
+
+    test_df = pd.read_csv(args.test_data_csv)
     label_files = list()
     output_files = list()
-    for f in sorted(os.listdir(label_directory)):
-        F = os.path.join(label_directory, f) # Full path for label file
+    for F in sorted(test_df['hea_path']): #sorted(os.listdir(label_directory)):
+        #F = os.path.join(label_directory, f) # Full path for label file
+        f = os.path.basename(F)
         if os.path.isfile(F) and F.lower().endswith('.hea') and not f.lower().startswith('.'):
             root, ext = os.path.splitext(f)
             g = root + '.csv'
@@ -534,7 +539,7 @@ def compute_auc(labels, outputs):
     macro_auroc = np.nanmean(auroc)
     macro_auprc = np.nanmean(auprc)
 
-    return macro_auroc, macro_auprc
+    return macro_auroc, macro_auprc, tnr, tpr
 
 # Compute modified confusion matrix for multi-class, multi-label tasks.
 def compute_modified_confusion_matrix(labels, outputs):
