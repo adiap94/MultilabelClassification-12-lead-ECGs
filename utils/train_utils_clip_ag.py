@@ -22,6 +22,8 @@ from loss.weight_BCE_loss import WeightedMultilabel
 from loss.LDAMLoss import LDAMLoss
 from loss.DiceLoss import DiceLoss
 from loss.DiceLoss import TverskyLoss
+# from monai.networks.nets import UNETR
+from models.transformer import UNETR
 
 def nn_forward(model, sigmoid, criterion, inputs, ag, labels):
     logits = model(inputs, ag)
@@ -73,7 +75,13 @@ class train_utils(object):
 
         # Define the model
         self.num_classes = Dataset.num_classes
-        self.model = getattr(models, args.model_name)(in_channel=Dataset.inputchannel, out_channel=Dataset.num_classes)
+        if args.model_name=="seresnet18_1d_ag":
+            self.model = getattr(models, args.model_name)(in_channel=Dataset.inputchannel, out_channel=Dataset.num_classes)
+        elif args.model_name=="UNETR":
+            self.model = UNETR(in_channels=1, out_channels=1,
+                          img_size=(12, 4096),  norm_name='batch', spatial_dims=2)
+        elif args.model_name =="ECG_transformer":
+            print("hello")
         # self.model = getattr(models, args.model_name)()
         # self.model.fc = torch.nn.Linear(self.model.fc.in_features, Dataset.num_classes)
         # parameter_list = self.model.parameter_list(args.lr)
