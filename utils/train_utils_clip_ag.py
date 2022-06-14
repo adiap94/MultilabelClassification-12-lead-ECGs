@@ -24,6 +24,7 @@ from loss.DiceLoss import DiceLoss
 from loss.DiceLoss import TverskyLoss
 # from monai.networks.nets import UNETR
 from models.transformer import UNETR
+from models.TransformerModel import TransformerModel
 
 def nn_forward(model, sigmoid, criterion, inputs, ag, labels):
     logits = model(inputs, ag)
@@ -78,9 +79,11 @@ class train_utils(object):
         if args.model_name=="seresnet18_1d_ag":
             self.model = getattr(models, args.model_name)(in_channel=Dataset.inputchannel, out_channel=Dataset.num_classes)
         elif args.model_name=="UNETR":
-            self.model = UNETR(in_channels=1, out_channels=1,
-                          img_size=(12, 4096),  norm_name='batch', spatial_dims=2)
-        elif args.model_name =="ECG_transformer":
+            self.model = UNETR(in_channels=2, out_channels=1,
+                          img_size=(12, 4096),  norm_name='batch', spatial_dims=2,feature_size=4,num_heads=8,hidden_size=4096)
+        elif args.model_name =="TransformerModel":
+            # self.model = TransformerModel(64, 4, 256, 4, 2, 24, 0.25, 0.1)
+            self.model = TransformerModel(16, 4, 32, 4, 2, 24, 0.25, 0.1)
             print("hello")
         # self.model = getattr(models, args.model_name)()
         # self.model.fc = torch.nn.Linear(self.model.fc.in_features, Dataset.num_classes)
@@ -203,7 +206,11 @@ class train_utils(object):
                     with torch.set_grad_enabled(phase == 'train'):
                         # forward
                         if phase == 'train':
-                            logits = self.model(inputs, ag)
+                            if args.model_name=="seresnet18_1d_ag":
+                                logits = self.model(inputs, ag)
+                            else:
+                                # inputs = inputs.unsqueeze(0)
+                                self.model(inputs)
                             #logits_prob = logits
                             logits_prob = self.sigmoid(logits)
                             if batch_idx == 0:

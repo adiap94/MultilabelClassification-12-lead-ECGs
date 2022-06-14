@@ -12,10 +12,14 @@
 from typing import Sequence, Tuple, Union
 
 import torch.nn as nn
-
+import torch
+import numpy as np
 # from monai.networks.blocks.dynunet_block import UnetOutBlock
-from monai.networks.blocks.unetr_block import UnetrBasicBlock, UnetrPrUpBlock, UnetrUpBlock
-from monai.networks.nets.vit import ViT
+# from monai.networks.blocks.unetr_block import UnetrBasicBlock, UnetrPrUpBlock, UnetrUpBlock
+from models.unetr_block import UnetrBasicBlock, UnetrPrUpBlock, UnetrUpBlock
+from models.dynunet_block import UnetOutBlock
+# from monai.networks.nets.vit import ViT
+from models.vit import ViT
 from monai.utils import ensure_tuple_rep
 from typing import Optional, Sequence, Tuple, Union
 class UnetOutBlock(nn.Module):
@@ -94,7 +98,9 @@ class UNETR(nn.Module):
 
         self.num_layers = 12
         img_size = ensure_tuple_rep(img_size, spatial_dims)
-        self.patch_size = ensure_tuple_rep(16, spatial_dims)
+        # self.patch_size = ensure_tuple_rep(16, spatial_dims)
+        #debug
+        self.patch_size = ensure_tuple_rep(4, spatial_dims)
         self.feat_size = tuple(img_d // p_d for img_d, p_d in zip(img_size, self.patch_size))
         self.hidden_size = hidden_size
         self.classification = False
@@ -203,9 +209,15 @@ class UNETR(nn.Module):
 
     def forward(self, x_in):
         x, hidden_states_out = self.vit(x_in)
-        enc1 = self.encoder1(x_in)
+        enc1 = self.encoder1(x_in,flag=True)
         x2 = hidden_states_out[3]
-        enc2 = self.encoder2(self.proj_feat(x2, self.hidden_size, self.feat_size))
+        c = np.ones((2, 4096, 3, 1024))
+        d = np.float32(c)
+        a = torch.tensor(d)
+        a = a.to(torch.device("cuda"))
+        y = self.encoder2(a)
+        enc2 = self.encoder2(y)
+        # enc2 = self.encoder2(self.proj_feat(x2, self.hidden_size, self.feat_size))
         x3 = hidden_states_out[6]
         enc3 = self.encoder3(self.proj_feat(x3, self.hidden_size, self.feat_size))
         x4 = hidden_states_out[9]
