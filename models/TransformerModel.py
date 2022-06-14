@@ -19,7 +19,8 @@ class TransformerModel(nn.Module):
         self.n_conv_layers = n_conv_layers
         self.relu = torch.nn.ReLU()
         self.softmax=torch.nn.Softmax()
-        self.pos_encoder = PositionalEncoding(748, dropout)
+        # self.pos_encoder = PositionalEncoding(748, dropout)
+        self.pos_encoder = PositionalEncoding(384, dropout)
         self.pos_encoder2 = PositionalEncoding(6, dropout)
         self.self_att_pool = SelfAttentionPooling(d_model)
         self.self_att_pool2 = SelfAttentionPooling(d_model)

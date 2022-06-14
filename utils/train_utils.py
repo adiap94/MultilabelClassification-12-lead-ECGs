@@ -12,7 +12,7 @@ from torch import optim
 import numpy as np
 
 import models
-import datasets
+import dataset
 from utils.save import Save_Tool
 from utils.freeze import set_freeze_by_id
 from utils.metrics import *
@@ -27,7 +27,7 @@ class train_utils(object):
 
     def setup(self):
         """
-        Initialize the datasets, model, loss and optimizer
+        Initialize the dataset, model, loss and optimizer
         :param args:
         :return:
         """
@@ -45,11 +45,11 @@ class train_utils(object):
             self.device_count = 1
             logging.info('using {} cpu'.format(self.device_count))
 
-        # Load the datasets
-        Dataset = getattr(datasets, args.data_name)
-        self.datasets = {}
-        self.datasets['train'], self.datasets['val'] = Dataset(args.data_dir, args.split).data_preprare()
-        self.dataloaders = {x: torch.utils.data.DataLoader(self.datasets[x], batch_size=args.batch_size,
+        # Load the dataset
+        Dataset = getattr(dataset, args.data_name)
+        self.dataset = {}
+        self.dataset['train'], self.dataset['val'] = Dataset(args.data_dir, args.split).data_preprare()
+        self.dataloaders = {x: torch.utils.data.DataLoader(self.dataset[x], batch_size=args.batch_size,
                                                            shuffle=(True if x == 'train' else False),
                                                            num_workers=args.num_workers,
                                                            pin_memory=(True if self.device == 'cuda' else False),

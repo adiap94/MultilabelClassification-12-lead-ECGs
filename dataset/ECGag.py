@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from datasets.ECGDatasets import dataset
+from dataset.ECGdatasetag import dataset
 import pandas as pd
-from datasets.sequence_aug import *
+from dataset.sequence_aug import *
 
 normlizetype = 'none'
 start = 0
@@ -58,18 +58,15 @@ class ECG(object):
     inputchannel = 12
 
 
-    def __init__(self, data_dir, split='0'):
-        self.data_dir = data_dir
-        self.split = split
+    def __init__(self,args):
+        # self.data_dir = data_dir
+        # self.split = splits
+        self.args = args
 
 
 
     def data_preprare(self, test=False):
         if test:
-            label_csv = load_and_clean_sub(self.data_dir)
-            test_dataset = dataset(anno_pd=label_csv, test=True, transform=data_transforms['test'])
-            return test_dataset
-        else:
             train_path = './data_split/train_split' + self.split + '.csv'
             val_path = './data_split/test_split' + self.split + '.csv'
             train_pd = pd.read_csv(train_path)
@@ -77,6 +74,19 @@ class ECG(object):
 
             train_dataset = dataset(anno_pd=train_pd, transform=data_transforms['train'], data_dir=self.data_dir)
             val_dataset = dataset(anno_pd=val_pd, transform=data_transforms['val'], data_dir=self.data_dir)
+            return train_dataset, val_dataset
+        else:
+            # train_path = './data_split/train_split' + self.split + '.csv'
+            # val_path = './data_split/test_split' + self.split + '.csv'
+            train_path = self.args.train_data_csv
+            val_path = self.args.val_data_csv
+            train_pd = pd.read_csv(train_path)
+            val_pd = pd.read_csv(val_path)
+            if self.args.debug_mode:
+                train_pd = train_pd.head()
+                val_pd = val_pd.head()
+            train_dataset = dataset(anno_pd=train_pd, transform=data_transforms['train'])
+            val_dataset = dataset(anno_pd=val_pd, transform=data_transforms['val'])
             return train_dataset, val_dataset
 
 

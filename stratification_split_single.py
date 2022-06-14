@@ -120,8 +120,8 @@ def read_and_split_data(data_directory):
             dataset_train.append(train_tmp)
             dataset_test.append(test_tmp)
 
-    print('combine different datasets and save them as .csv')
-    # combine different datasets and save them as .csv
+    print('combine different dataset and save them as .csv')
+    # combine different dataset and save them as .csv
     for i in tqdm(range(split_number)):
         data_split_train = dataset_train[0][i].copy()
         data_split_test = dataset_test[0][i].copy()

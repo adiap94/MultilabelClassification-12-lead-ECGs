@@ -13,7 +13,7 @@ import numpy as np
 import math
 
 import models
-import datasets
+import dataset
 from utils.save import Save_Tool
 from utils.freeze import set_freeze_by_id
 from utils.metrics import *
@@ -25,6 +25,7 @@ from loss.DiceLoss import TverskyLoss
 # from monai.networks.nets import UNETR
 from models.transformer import UNETR
 from models.TransformerModel import TransformerModel
+from transformers import AutoModelForImageClassification, TrainingArguments, Trainer
 
 def nn_forward(model, sigmoid, criterion, inputs, ag, labels):
     logits = model(inputs, ag)
@@ -44,7 +45,7 @@ class train_utils(object):
         self.best_metric = 0
     def setup(self):
         """
-        Initialize the datasets, model, loss and optimizer
+        Initialize the dataset, model, loss and optimizer
         :param args:
         :return:
         """
@@ -62,12 +63,12 @@ class train_utils(object):
             self.device_count = 1
             logging.info('using {} cpu'.format(self.device_count))
 
-        # Load the datasets
-        Dataset = getattr(datasets, args.data_name)
-        self.datasets = {}
-        self.datasets['train'], self.datasets['val'] = Dataset(args).data_preprare()
+        # Load the dataset
+        Dataset = getattr(dataset, args.data_name)
+        self.dataset = {}
+        self.dataset['train'], self.dataset['val'] = Dataset(args).data_preprare()
         self.dataloaders = {
-            x: torch.utils.data.DataLoader(self.datasets[x], batch_size=(args.batch_size if x == 'train' else 1),
+            x: torch.utils.data.DataLoader(self.dataset[x], batch_size=(args.batch_size if x == 'train' else 1),
                                            shuffle=(True if x == 'train' else False),
                                            num_workers=args.num_workers,
                                            pin_memory=(True if self.device == 'cuda' else False),
@@ -83,8 +84,18 @@ class train_utils(object):
                           img_size=(12, 4096),  norm_name='batch', spatial_dims=2,feature_size=4,num_heads=8,hidden_size=4096)
         elif args.model_name =="TransformerModel":
             # self.model = TransformerModel(64, 4, 256, 4, 2, 24, 0.25, 0.1)
-            self.model = TransformerModel(16, 4, 32, 4, 2, 24, 0.25, 0.1)
+            self.model = TransformerModel(2, 2, 8, 4, 2, 24, 0.25, 0.1)
             print("hello")
+        elif args.model_name == "TransformerHF":
+            # self.model = TransformerModel(2, 2, 8, 4, 2, 24, 0.25, 0.1)
+            self.model = AutoModelForImageClassification.from_pretrained(
+                "google/vit-base-patch16-224-in21k",
+                num_labels=24
+                # id2label=id2label,
+                # label2id=label2id,
+            )
+
+
         # self.model = getattr(models, args.model_name)()
         # self.model.fc = torch.nn.Linear(self.model.fc.in_features, Dataset.num_classes)
         # parameter_list = self.model.parameter_list(args.lr)
