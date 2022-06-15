@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from dataset.ECGdataset import dataset
+from dataset.ECGDatasets import dataset
 import pandas as pd
 from dataset.sequence_aug import *
 
