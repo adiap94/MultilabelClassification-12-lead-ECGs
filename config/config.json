@@ -6,7 +6,7 @@
 	"test_data_csv" : "/tcmldrive/project_dl/db/test_split5.csv",
 	"data_name": "ECGag",
 	"monitor_acc" : "ecgAcc",
-	"batch_size" : 1,
+	"batch_size" : 2,
 	"num_workers" :0,
 	"opt":"sgd",
 	"lr":0.0003,

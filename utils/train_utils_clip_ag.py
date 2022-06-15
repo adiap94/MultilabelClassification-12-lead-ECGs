@@ -25,8 +25,8 @@ from loss.DiceLoss import TverskyLoss
 # from monai.networks.nets import UNETR
 from models.transformer import UNETR
 from models.TransformerModel import TransformerModel
-from transformers import AutoModelForImageClassification, TrainingArguments, Trainer
-
+from transformers import AutoModelForImageClassification
+# from transformers_main.src.transformers import AutoModelForImageClassification
 def nn_forward(model, sigmoid, criterion, inputs, ag, labels):
     logits = model(inputs, ag)
     logits_prob = sigmoid(logits)
@@ -219,6 +219,9 @@ class train_utils(object):
                         if phase == 'train':
                             if args.model_name=="seresnet18_1d_ag":
                                 logits = self.model(inputs, ag)
+                            elif args.model_name == "TransformerHF":
+                                inputs=inputs.unsqueeze(1)
+                                logits = self.model(inputs)
                             else:
                                 # inputs = inputs.unsqueeze(0)
                                 self.model(inputs)
