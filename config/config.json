@@ -1,5 +1,5 @@
 {
-    "model_name": "TransformerHF",
+    "model_name": "seresnet18_1d_ag",
 	"output_directory": "/tcmldrive/project_dl/results",
 	"train_data_csv" : "/tcmldrive/project_dl/db/train_split5.csv",
 	"val_data_csv" : "/tcmldrive/project_dl/db/val_split5.csv",

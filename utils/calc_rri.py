@@ -10,7 +10,9 @@ def get_rri(sig, fs=300, n_beats=10):
     Output: RRI, time in between each beat (10 beats otherwise 0-padded)
     """
     detectors = Detectors(fs)
-    sig_n = sig.numpy()
+    sig_n = sig
+
+    # sig_n = sig.numpy()
     # if type(sig).__module__ != np.__name__:
     #  sig_n = sig.numpy()
     # else:
