@@ -65,6 +65,7 @@ def parse_args():
     parser.add_argument('--print_step', type=int, default=200, help='the interval of log training information')
     parser.add_argument('--debug_mode', type=bool, default=False)
     parser.add_argument('--leads', type=list, default=[0,1,2,3,4,5,6,7,8,9,10,11])
+    parser.add_argument('--run_test', type=bool, default=False)
 
     args, _ = parser.parse_known_args()
     return args

@@ -21,6 +21,7 @@
     "gpu": "1",
     "max_epoch": 40,
 	"debug_mode":true,
-	"leads": [0,1,2]
+	"leads": [0,1,2],
+	"run_test": true
 
 }

@@ -5,7 +5,7 @@ import logging
 import os
 import time
 import warnings
-
+import driver
 import torch
 from torch import nn
 from torch import optim
@@ -159,6 +159,12 @@ class train_utils(object):
         df = pd.DataFrame([self.epoch_log])
         with open(self.csvLoggerFile_path, 'a') as f:
             df.to_csv(f, mode='a', header=f.tell() == 0, index=False)
+
+    def run_test(self, epoch):
+        if self.args.run_test:
+            if epoch == self.epoch_num - 1 :
+                print("run test")
+                driver.main(self.args.workdir, gpu_num=self.args.gpu)
 
     def save_model_checkpoint(self):
 
@@ -329,7 +335,7 @@ class train_utils(object):
             # save model checkpoint
             self.save_model_checkpoint()
 
-
+            self.args.run_test()
 
 
 
