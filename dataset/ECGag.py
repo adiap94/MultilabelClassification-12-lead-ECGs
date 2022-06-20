@@ -55,14 +55,14 @@ def load_and_clean_sub(path):
 
 class ECG(object):
     num_classes = 24
-    inputchannel = 12
+    # inputchannel = 12
 
 
     def __init__(self,args):
         # self.data_dir = data_dir
         # self.split = splits
         self.args = args
-
+        self.inputchannel=len(self.args.leads)
 
 
     def data_preprare(self, test=False):

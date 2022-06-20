@@ -78,7 +78,7 @@ class train_utils(object):
         # Define the model
         self.num_classes = Dataset.num_classes
         if args.model_name=="seresnet18_1d_ag":
-            self.model = getattr(models, args.model_name)(in_channel=Dataset.inputchannel, out_channel=Dataset.num_classes)
+            self.model = getattr(models, args.model_name)(in_channel=len(args.leads), out_channel=Dataset.num_classes)
         elif args.model_name=="UNETR":
             self.model = UNETR(in_channels=2, out_channels=1,
                           img_size=(12, 4096),  norm_name='batch', spatial_dims=2,feature_size=4,num_heads=8,hidden_size=4096)
