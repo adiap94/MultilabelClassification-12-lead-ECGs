@@ -63,7 +63,7 @@ def main(run_dir,gpu_num = "0"):
 
     # Load model.
     print('Loading 12ECG model...')
-    model = load_12ECG_model(model_path,device)
+    model = load_12ECG_model(model_path=model_path,device=device)
 
     # Iterate over files.
     print('Extracting 12ECG features...')
@@ -73,7 +73,7 @@ def main(run_dir,gpu_num = "0"):
         print('    {}/{}...'.format(i+1, num_files))
         tmp_input_file = f
         data,header_data = load_challenge_data(tmp_input_file)
-        current_label, current_score, classes = run_12ECG_classifier(data, header_data, model)
+        current_label, current_score, classes = run_12ECG_classifier(data, header_data, model,args)
         # Save results.
         save_challenge_predictions(output_directory,f,current_score,current_label,classes)
 
@@ -81,5 +81,5 @@ def main(run_dir,gpu_num = "0"):
     print('Done.')
 if __name__ == '__main__':
 
-    main(run_dir = "/tcmldrive/project_dl/results/restore/" )
+    main(run_dir = "/tcmldrive/project_dl/results/debug_mode/20220620-215139/" )
     pass

@@ -108,7 +108,7 @@ def output_label(logits_prob, threshold, num_classes):
     pred_label[pred_label > 1.1] = 1
     return score_tmp, pred_label
 
-def run_12ECG_classifier(data, header_data, model):
+def run_12ECG_classifier(data, header_data, model,args):
     weight_list = './magic_weight4.npz'
     num_classes = 24
     tar_fs = 257
@@ -120,6 +120,9 @@ def run_12ECG_classifier(data, header_data, model):
 
 
     m = nn.Sigmoid()
+    # select specefic leads
+    data = data[args.leads,:]
+
     data = processing_data(data, win_length, src_fs, tar_fs)
     inputs = data.to(device)
     # Use your classifier here to obtain a label and score for each class.
@@ -179,9 +182,12 @@ def run_12ECG_classifier(data, header_data, model):
     return current_label, current_score, classes
 
 def load_12ECG_model(model_path,device):
-    model = getattr(models, 'seresnet18_1d_ag')(in_channel=12, out_channel=24)
 
-    model.load_state_dict(torch.load(model_path, map_location=device))
+    if os.path.splitext(os.path.basename(model_path))[1] == ".pth":
+        model = getattr(models, 'seresnet18_1d_ag')(in_channel=12, out_channel=24)
+        model.load_state_dict(torch.load(model_path, map_location=device))
+    elif os.path.splitext(os.path.basename(model_path))[1] == ".pt":
+        model = torch.load(model_path)
     model.to(device)
     model.eval()
     return model

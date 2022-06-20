@@ -162,7 +162,7 @@ class train_utils(object):
 
     def run_test(self, epoch):
         if self.args.run_test:
-            if epoch == self.epoch_num - 1 :
+            if epoch == self.args.max_epoch - 1 :
                 print("run test")
                 driver.main(self.args.workdir, gpu_num=self.args.gpu)
 
@@ -335,7 +335,7 @@ class train_utils(object):
             # save model checkpoint
             self.save_model_checkpoint()
 
-            self.args.run_test()
+            self.run_test(epoch)
 
 
 
