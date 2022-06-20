@@ -50,18 +50,10 @@ class train_utils(object):
         :return:
         """
         args = self.args
+        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+        self.device = torch.device("cuda:0")
 
-        # Consider the gpu or cpu condition
-        if torch.cuda.is_available():
-            self.device = torch.device("cuda")
-            self.device_count = torch.cuda.device_count()
-            logging.info('using {} gpus'.format(self.device_count))
-            assert args.batch_size % self.device_count == 0, "batch size should be divided by device count"
-        else:
-            warnings.warn("gpu is not available")
-            self.device = torch.device("cpu")
-            self.device_count = 1
-            logging.info('using {} cpu'.format(self.device_count))
+
 
         # Load the dataset
         Dataset = getattr(dataset, args.data_name)
@@ -102,8 +94,8 @@ class train_utils(object):
 
         # if args.layer_num_last != 0:
         #     set_freeze_by_id(self.model, args.layer_num_last)
-        if self.device_count > 1:
-            self.model = torch.nn.DataParallel(self.model)
+        # if self.device_count > 1:
+        #     self.model = torch.nn.DataParallel(self.model)
 
         # Define the optimizer
         if args.opt == 'sgd':
