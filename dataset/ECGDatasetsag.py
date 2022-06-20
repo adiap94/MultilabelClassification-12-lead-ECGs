@@ -59,7 +59,8 @@ def prepare_data(age, gender):
 
 class dataset(Dataset):
 
-    def __init__(self, anno_pd, test=False, transform=None, data_dir=None, loader=load_data):
+    def __init__(self, anno_pd, test=False, transform=None, data_dir=None, loader=load_data,args=None):
+
         self.test = test
         if self.test:
             self.data = anno_pd['mat_path'].tolist()
@@ -73,6 +74,7 @@ class dataset(Dataset):
             self.gender = anno_pd['gender'].tolist()
             self.fs = anno_pd['fs'].tolist()
 
+        self.leads = args.leads
         self.transforms = transform
         self.data_dir = data_dir
         self.loader = loader
@@ -95,6 +97,8 @@ class dataset(Dataset):
             gender = self.gender[item]
             age_gender = prepare_data(age, gender)
             img = self.loader(img_name, src_fs=fs)
+            # select specific leads
+            img = img[self.leads, :]
             label = self.multi_labels[item]
             """
             for i in range(img.shape[1]):

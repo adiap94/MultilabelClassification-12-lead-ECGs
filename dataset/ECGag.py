@@ -72,8 +72,8 @@ class ECG(object):
             train_pd = pd.read_csv(train_path)
             val_pd = pd.read_csv(val_path)
 
-            train_dataset = dataset(anno_pd=train_pd, transform=data_transforms['train'], data_dir=self.data_dir)
-            val_dataset = dataset(anno_pd=val_pd, transform=data_transforms['val'], data_dir=self.data_dir)
+            train_dataset = dataset(anno_pd=train_pd, transform=data_transforms['train'], data_dir=self.data_dir,args=self.args)
+            val_dataset = dataset(anno_pd=val_pd, transform=data_transforms['val'], data_dir=self.data_dir,args=self.args)
             return train_dataset, val_dataset
         else:
             # train_path = './data_split/train_split' + self.split + '.csv'
@@ -85,8 +85,8 @@ class ECG(object):
             if self.args.debug_mode:
                 train_pd = train_pd.head()
                 val_pd = val_pd.head()
-            train_dataset = dataset(anno_pd=train_pd, transform=data_transforms['train'])
-            val_dataset = dataset(anno_pd=val_pd, transform=data_transforms['val'])
+            train_dataset = dataset(anno_pd=train_pd, transform=data_transforms['train'],args=self.args)
+            val_dataset = dataset(anno_pd=val_pd, transform=data_transforms['val'],args=self.args)
             return train_dataset, val_dataset
 
 
