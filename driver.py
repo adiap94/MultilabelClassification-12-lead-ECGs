@@ -6,6 +6,7 @@ from run_12ECG_classifier import load_12ECG_model, run_12ECG_classifier
 from collections import namedtuple
 import utiles
 import pandas as pd
+from utils.metrics import *
 
 def load_challenge_data(filename):
 
@@ -20,7 +21,6 @@ def load_challenge_data(filename):
 
 
     return data, header_data
-
 
 def save_challenge_predictions(output_directory,filename,scores,labels,classes):
     basename = os.path.basename(filename)
@@ -77,8 +77,13 @@ def main(run_dir,gpu_num = "0"):
         # Save results.
         save_challenge_predictions(output_directory,f,current_score,current_label,classes)
 
-
+    # evaluation metrics
+    auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric = evaluate_12ECG_score(args, output_directory)
+    eval_res = np.array([[auroc,auprc,challenge_metric]])
+    eval_res = pd.DataFrame(eval_res, columns = ['auroc','auprc','challenge_metric'])
+    eval_res.to_csv(os.path.join(run_dir,"metrics.csv"))
     print('Done.')
+
 if __name__ == '__main__':
 
     main(run_dir = "/tcmldrive/project_dl/results/debug_mode/20220620-215139/" )
