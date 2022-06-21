@@ -42,7 +42,7 @@ class train_utils(object):
         self.out_dir = args.workdir
         self.csvLoggerFile_path = os.path.join(self.out_dir, "history.csv")
         self.epoch_log = {}
-        self.best_metric = 0
+        self.best_metric = np.inf
     def setup(self):
         """
         Initialize the dataset, model, loss and optimizer
@@ -160,8 +160,11 @@ class train_utils(object):
 
     def save_model_checkpoint(self):
 
-        if self.epoch_log["challenge_metric_val"] > self.best_metric:
-            self.best_metric = self.epoch_log["challenge_metric_val"]
+        # if self.epoch_log["challenge_metric_val"] > self.best_metric:
+        #     self.best_metric = self.epoch_log["challenge_metric_val"]
+        if self.epoch_log["epoch_loss_val"] < self.best_metric:
+            self.best_metric = self.epoch_log["epoch_loss_val"]
+
             PATH = os.path.join(self.args.workdir, "Models", "best_metric_model.pt")
             torch.save(self.model, PATH)
             print("saved new best metric model")
