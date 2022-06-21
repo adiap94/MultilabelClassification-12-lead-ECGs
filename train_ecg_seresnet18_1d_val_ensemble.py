@@ -64,6 +64,7 @@ if __name__ == '__main__':
     save_dir = os.path.join(args.checkpoint_dir, sub_dir)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+        os.chmod(save_dir, mode=0o777)
 
     # set the logger
     setlogger(os.path.join(save_dir, 'train.log'))

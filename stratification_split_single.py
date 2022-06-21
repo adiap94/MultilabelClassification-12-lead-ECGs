@@ -80,6 +80,7 @@ def read_and_split_data(data_directory):
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+        os.chmod(save_dir, mode=0o777)
 
     # Get every file
     input_files = lsdir(rootdir=data_directory, suffix=".mat")

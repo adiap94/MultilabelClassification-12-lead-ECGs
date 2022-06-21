@@ -46,7 +46,9 @@ def create_working_folder(config=None):
 
     # create folders
     os.makedirs(current_work_dir, exist_ok=True)
+    os.chmod(current_work_dir, mode=0o777)
     os.makedirs(os.path.join(current_work_dir, 'Models'), exist_ok=True)
+    os.chmod(os.path.join(current_work_dir, 'Models'), mode=0o777)
     print(current_work_dir)
 
     # update opt with working dir
