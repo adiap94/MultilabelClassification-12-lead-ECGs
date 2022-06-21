@@ -162,7 +162,7 @@ class train_utils(object):
 
         if self.epoch_log["challenge_metric_val"] > self.best_metric:
             self.best_metric = self.epoch_log["challenge_metric_val"]
-            PATH = os.path.join(self.out_dir, "Models", "best_metric_model.pt")
+            PATH = os.path.join(self.args.workdir, "Models", "best_metric_model.pt")
             torch.save(self.model, PATH)
             print("saved new best metric model")
 
