@@ -89,6 +89,8 @@ def evaluate_12ECG_score(args, output_directory):#(label_directory, output_direc
     # Evaluate the model by comparing the labels and outputs.
     print('Evaluating model...')
 
+    confusion_matrices = compute_confusion_matrices(labels, binary_outputs)
+
     print('- AUROC and AUPRC...')
     auroc, auprc, sen, spe = compute_auc(labels, scalar_outputs)
 
@@ -107,7 +109,7 @@ def evaluate_12ECG_score(args, output_directory):#(label_directory, output_direc
     print('Done.')
 
     # Return the results.
-    return auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric
+    return auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, confusion_matrices
 
 # Check if the input is a number.
 def is_number(x):
@@ -538,6 +540,7 @@ def compute_auc(labels, outputs):
     # Compute macro AUROC and macro AUPRC across classes.
     macro_auroc = np.nanmean(auroc)
     macro_auprc = np.nanmean(auprc)
+
 
     return macro_auroc, macro_auprc, tnr, tpr
 
