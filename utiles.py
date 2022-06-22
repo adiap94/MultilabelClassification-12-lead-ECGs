@@ -54,6 +54,11 @@ def create_working_folder(config=None):
     # update opt with working dir
     config["workdir"] = current_work_dir
 
+    if config["debug_mode"]:
+        config["batch_size"]=2
+        config["max_epoch"]=2
+
+
     # save configuration file in working dir
     json_dump(config, file_path=os.path.join(current_work_dir, "config.json"))
 

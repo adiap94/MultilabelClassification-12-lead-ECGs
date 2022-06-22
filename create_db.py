@@ -77,7 +77,7 @@ def main(source_dir,out_dir):
     df.loc[idx, "set"] = "val"
 
     df.set.fillna(value="test", inplace=True)
-    df.to_csv(os.path.join(out_dir,"db.csv"),index=False)
+    # df.to_csv(os.path.join(out_dir,"db.csv"),index=False)
 
     print("finish creating db")
     print("sava db to: " + os.path.join(out_dir,"db.csv"))
