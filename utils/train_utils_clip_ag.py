@@ -43,7 +43,7 @@ class train_utils(object):
         self.out_dir = args.workdir
         self.csvLoggerFile_path = os.path.join(self.out_dir, "history.csv")
         self.epoch_log = {}
-        self.best_metric = 0
+        self.best_metric = np.inf
     def setup(self):
         """
         Initialize the dataset, model, loss and optimizer
@@ -316,16 +316,16 @@ class train_utils(object):
                 epoch_acc = challenge_metric
 
                 # save the model
-                if phase == 'val':
-                    # save the checkpoint for other learning
-                    model_state_dic =  self.model.state_dict()
-                    # save the best model according to the val accuracy
-                    if epoch_acc > best_acc:
-                        best_acc = epoch_acc
-                        logging.info("save best model epoch {}, CM: {:.4f}".
-                                     format(epoch, challenge_metric))
-                        torch.save(model_state_dic,
-                                   os.path.join(self.args.workdir,"Models", '"best_metric_model.pth'))
+                # if phase == 'val':
+                #     # save the checkpoint for other learning
+                #     model_state_dic =  self.model.state_dict()
+                #     # save the best model according to the val accuracy
+                #     if epoch_acc > best_acc:
+                #         best_acc = epoch_acc
+                #         logging.info("save best model epoch {}, CM: {:.4f}".
+                #                      format(epoch, challenge_metric))
+                #         torch.save(model_state_dic,
+                #                    os.path.join(self.args.workdir,"Models", '"best_metric_model.pth'))
 
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
@@ -334,7 +334,7 @@ class train_utils(object):
             self.writeCSVLoggerFile()
 
             # save model checkpoint
-            # self.save_model_checkpoint()
+            self.save_model_checkpoint()
 
             self.run_test(epoch)
 
