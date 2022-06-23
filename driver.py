@@ -58,8 +58,8 @@ def main(run_dir,gpu_num = "0"):
     # debug
     # input_files = input_files[:2]
 
-    if not os.path.isdir(output_directory):
-        os.mkdir(output_directory)
+    os.makedirs(output_directory, exist_ok=True)
+    os.chmod(output_directory, mode=0o777)
 
     # Load model.
     print('Loading 12ECG model...')
@@ -103,5 +103,5 @@ def main(run_dir,gpu_num = "0"):
 
 if __name__ == '__main__':
 
-    main(run_dir = "/tcmldrive/project_dl/results/20220622-004641/" )
+    main(run_dir = "/tcmldrive/project_dl/results/restore/" )
     pass
