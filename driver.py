@@ -81,7 +81,7 @@ def main(run_dir, only_eval_bool, gpu_num = "0"):
 
     print('saving evaluation methods...')
 
-    auroc, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices = evaluate_12ECG_score(args, output_directory)
+    classes, auroc, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices = evaluate_12ECG_score(args, output_directory)
 
     cm = confusion_matrices.reshape(24,4)
     cm = pd.DataFrame(cm, columns = ['TP', 'FP', 'FN', 'TN'])
@@ -95,11 +95,11 @@ def main(run_dir, only_eval_bool, gpu_num = "0"):
         specificity[i] = cm['TN'][i]/(cm['TN'][i]+cm['FP'][i])
 
     all_class_analayze = np.array([sensitivity, specificity, precision, accuracy_all, auroc_all, auprc_all, f_measure_all, f_beta_all, g_all]).T
-    all_class_analayze = pd.DataFrame(all_class_analayze, columns = ['sensitivity', 'specificity','precision', 'accuracy', 'auroc', 'auprc', 'f_measure', 'f_beta_measure', 'g_beta_measure'])
-    all_class_analayze.to_csv(os.path.join(run_dir,"analyze_all_classes.csv"))
+    all_class_analayze = pd.DataFrame(all_class_analayze, columns = ['sensitivity', 'specificity','precision', 'accuracy', 'auroc', 'auprc', 'f_measure', 'f_beta_measure', 'g_beta_measure'], index = classes)
+    all_class_analayze.to_csv(os.path.join(run_dir,"analyze_all_classes_2.csv"))
 
     eval_res = np.array([[auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, np.nanmean(precision), np.nanmean(sensitivity), np.nanmean(specificity)]])
-    eval_res = pd.DataFrame(eval_res, columns = ['auroc', 'auprc', 'accuracy', 'f_measure', 'f_beta_measure', 'g_beta_measure', 'challenge_metric', 'precision', 'sensitivity', 'specificity'])
+    eval_res = pd.DataFrame(eval_res, columns = ['auroc', 'auprc', 'accuracy', 'f_measure', 'f_beta_measure', 'g_beta_measure', 'challenge_metric', 'precision', 'sensitivity', 'specificity'], index = classes)
     eval_res.to_csv(os.path.join(run_dir,"metrics.csv"))
 
     print('Done.')
