@@ -147,6 +147,8 @@ class train_utils(object):
         elif args.loss=="BCE-focalLoss":
             kwargs = {"alpha": 0.25, "gamma": 2.0, "reduction": 'mean'}
             self.criterion  = BinaryFocalLossWithLogits(**kwargs)
+        elif args.loss =="KL":
+            self.criterion = nn.KLDivLoss(reduction="batchmean")
 
         #self.criterion = TverskyLoss()
         self.sigmoid = nn.Sigmoid()
@@ -240,6 +242,7 @@ class train_utils(object):
                             else:
                                 labels_all = torch.cat((labels_all, labels), 0)
                                 logits_prob_all = torch.cat((logits_prob_all, logits_prob), 0)
+
                             loss = self.criterion(logits, labels)
                             loss_temp = loss.item() * inputs.size(0)
                             epoch_loss += loss_temp
