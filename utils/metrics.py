@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import os
 import pandas as pd
+from sklearn.metrics import accuracy_score
 
 #计算F1score
 def cal_Acc(y_true, y_pre, threshold=0.5, num_classes=9, beta=2, normal=False):
@@ -92,16 +93,16 @@ def evaluate_12ECG_score(args, output_directory):#(label_directory, output_direc
     confusion_matrices = compute_confusion_matrices(labels, binary_outputs)
 
     print('- AUROC and AUPRC...')
-    auroc, auprc, sen, spe = compute_auc(labels, scalar_outputs)
+    auroc, auprc, auroc_all, auprc_all,tnr, tpr = compute_auc(labels, scalar_outputs)
 
     print('- Accuracy...')
     accuracy = compute_accuracy(labels, binary_outputs)
-
+    accuracy_all = compute_accuracy_all_classes(labels, binary_outputs)
     print('- F-measure...')
-    f_measure = compute_f_measure(labels, binary_outputs)
+    f_measure, f_measure_all = compute_f_measure(labels, binary_outputs)
 
     print('- F-beta and G-beta measures...')
-    f_beta_measure, g_beta_measure = compute_beta_measures(labels, binary_outputs, beta=2)
+    f_beta_measure, g_beta_measure, f_beta_all, g_all = compute_beta_measures(labels, binary_outputs, beta=2)
 
     print('- Challenge metric...')
     challenge_metric = compute_challenge_metric(weights, labels, binary_outputs, classes, normal_class)
@@ -109,7 +110,7 @@ def evaluate_12ECG_score(args, output_directory):#(label_directory, output_direc
     print('Done.')
 
     # Return the results.
-    return auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, confusion_matrices
+    return auroc, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices
 
 # Check if the input is a number.
 def is_number(x):
@@ -379,6 +380,18 @@ def compute_accuracy(labels, outputs):
 
     return float(num_correct_recordings) / float(num_recordings)
 
+#compute acc for label
+def compute_accuracy_all_classes(labels, outputs):
+    num_recordings, num_classes = np.shape(labels)
+
+    num_correct_recordings = np.zeros((num_classes))#0
+    for i in range(num_recordings):
+        for j in range(num_classes):
+            if (labels[i, j]==outputs[i, j]):
+                num_correct_recordings[j] += 1
+
+    return (num_correct_recordings) / (num_recordings)
+
 # Compute confusion matrices.
 def compute_confusion_matrices(labels, outputs, normalize=False):
     # Compute a binary confusion matrix for each class k:
@@ -438,7 +451,7 @@ def compute_f_measure(labels, outputs):
 
     macro_f_measure = np.nanmean(f_measure)
 
-    return macro_f_measure
+    return macro_f_measure, f_measure
 
 # Compute F-beta and G-beta measures from the unofficial phase of the Challenge.
 def compute_beta_measures(labels, outputs, beta):
@@ -462,7 +475,7 @@ def compute_beta_measures(labels, outputs, beta):
     macro_f_beta_measure = np.nanmean(f_beta_measure)
     macro_g_beta_measure = np.nanmean(g_beta_measure)
 
-    return macro_f_beta_measure, macro_g_beta_measure
+    return macro_f_beta_measure, macro_g_beta_measure, f_beta_measure, g_beta_measure
 
 # Compute macro AUROC and macro AUPRC.
 def compute_auc(labels, outputs):
@@ -542,7 +555,7 @@ def compute_auc(labels, outputs):
     macro_auprc = np.nanmean(auprc)
 
 
-    return macro_auroc, macro_auprc, tnr, tpr
+    return macro_auroc, macro_auprc, auroc, auprc,tnr, tpr
 
 # Compute modified confusion matrix for multi-class, multi-label tasks.
 def compute_modified_confusion_matrix(labels, outputs):

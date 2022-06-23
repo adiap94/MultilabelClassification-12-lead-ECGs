@@ -78,7 +78,7 @@ def main(run_dir,gpu_num = "0"):
         save_challenge_predictions(output_directory,f,current_score,current_label,classes)
 
     print('saving evaluation methods...')
-    auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, confusion_matrices = evaluate_12ECG_score(args, output_directory)
+    auroc, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices = evaluate_12ECG_score(args, output_directory)
 
     cm = confusion_matrices.reshape(24,4)
     cm = pd.DataFrame(cm, columns = ['TP', 'FP', 'FN', 'TN'])
@@ -91,9 +91,9 @@ def main(run_dir,gpu_num = "0"):
         sensitivity[i] = cm['TP'][i]/(cm['TP'][i]+cm['FN'][i])  #recall
         specificity[i] = cm['TN'][i]/(cm['TN'][i]+cm['FP'][i])
 
-    sen_spe = np.array([sensitivity, specificity]).T
-    sen_spe = pd.DataFrame(sen_spe, columns = ['sensitivity', 'specificity'])
-    sen_spe.to_csv(os.path.join(run_dir,"sen&spe_all.csv"))
+    all_class_analayze = np.array([sensitivity, specificity, precision, accuracy_all, auroc_all, auprc_all, f_measure_all, f_beta_all, g_all]).T
+    all_class_analayze = pd.DataFrame(all_class_analayze, columns = ['sensitivity', 'specificity','precision', 'accuracy', 'auroc', 'auprc', 'f_measure', 'f_beta_measure', 'g_beta_measure'])
+    all_class_analayze.to_csv(os.path.join(run_dir,"analyze_all_classes.csv"))
 
     eval_res = np.array([[auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, np.nanmean(precision), np.nanmean(sensitivity), np.nanmean(specificity)]])
     eval_res = pd.DataFrame(eval_res, columns = ['auroc', 'auprc', 'accuracy', 'f_measure', 'f_beta_measure', 'g_beta_measure', 'challenge_metric', 'precision', 'sensitivity', 'specificity'])

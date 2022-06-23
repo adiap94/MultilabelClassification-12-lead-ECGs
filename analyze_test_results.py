@@ -17,5 +17,5 @@ if __name__ == '__main__':
     args = namedtuple('Struct', args.keys())(*args.values())
 
     output_directory = '/tcmldrive/project_dl/results/restore/test/'
-    auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, confusion_matrices = evaluate_12ECG_score(args, output_directory)
+    auroc, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices = evaluate_12ECG_score(args, output_directory)
 
