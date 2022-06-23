@@ -2,6 +2,7 @@ import os
 import time
 import pandas as pd
 import numpy as np
+import seaborn as sns
 from matplotlib import pyplot as plt
 
 def compare_results(dict_path,out_dir,improveCheckModel=None):
@@ -24,21 +25,34 @@ def compare_results(dict_path,out_dir,improveCheckModel=None):
             if 'Unnamed: 0' in df_tmp:
                 df_tmp = df_tmp.drop(columns=['Unnamed: 0'])
             df[value] =df_tmp[metric]
-            print("hello")
 
         bar_plot(df=df, metric_str=metric)
         plt.savefig(os.path.join(out_dir,"figs", metric + ".png"))
 
         if improveCheckModel:
             df = calc_diff(df=df, improveCheckModel=improveCheckModel)
-            bar_plot(df = df.filter(like='_diff', axis=1), metric_str=metric+"_diff")
+            df_diff = df = df.filter(like='_diff', axis=1)
+            bar_plot(df_diff, metric_str=metric+"_diff")
             plt.savefig(os.path.join(out_dir,"diff_figs", metric + "_diff.png"))
+
+            df_diff_metric = df_diff.add_prefix(metric+'_')
+            df_check = pd.concat([df_check, df_diff_metric],axis=1)
+
         df.to_csv(os.path.join(out_dir,"csv", metric + ".csv"), index=False)
 
+    if improveCheckModel:
+        df_check.to_csv(os.path.join(out_dir,"diff.csv"), index=False)
+        plt.figure()
+        sns.heatmap(df_check)
+        plt.savefig(os.path.join(out_dir,"diff_heatmap.png"))
 
-        # df.loc[df['original model + focal loss'] > df['original model'], "indicator"] = 1
-        # bool_check = df.idxmax(axis=1) == "original model + focal loss"
-        # idx = np.where(bool_check.to_numpy())[0]
+        df_check1 = df_check.copy()
+        df_check1[df_check1 < 0] = 0
+        df_check1[df_check > 0] = 1
+        plt.figure()
+        sns.heatmap(df_check1)
+        plt.savefig(os.path.join(out_dir,"diff_heatmap_binary.png"))
+
     pass
 
 def calc_diff(df,improveCheckModel):
@@ -63,7 +77,7 @@ def bar_plot(df, metric_str):
 if __name__ == '__main__':
     dict_path = {
         "/tcmldrive/project_dl/results/restore": "original model",
-        "/tcmldrive/project_dl/results/20220622-204757/": "original model + focal loss"
+        "/tcmldrive/project_dl/results/20220623-201217/": "original model + focal loss"
     }
     out_dir = "/tcmldrive/project_dl/results/compare_results"
     improveCheckModel = "original model + focal loss"
