@@ -6,9 +6,12 @@ from matplotlib import pyplot as plt
 
 def compare_results(dict_path,out_dir,improveCheckModel=None):
     out_dir = os.path.join(out_dir , time.strftime("%Y%m%d-%H%M%S"))
-    os.makedirs(out_dir, exist_ok=True)
-    os.chmod(out_dir, mode=0o777)
-
+    os.makedirs(os.path.join(out_dir,"diff_figs"), exist_ok=True)
+    os.chmod(os.path.join(out_dir,"diff_figs"), mode=0o777)
+    os.makedirs(os.path.join(out_dir,"figs"), exist_ok=True)
+    os.chmod(os.path.join(out_dir,"figs"), mode=0o777)
+    os.makedirs(os.path.join(out_dir,"csv"), exist_ok=True)
+    os.chmod(os.path.join(out_dir,"csv"), mode=0o777)
     if improveCheckModel:
         df_check = pd.DataFrame()
     metric_list = ['sensitivity', 'specificity', 'precision', 'accuracy', 'auroc', 'auprc', 'f_measure', 'f_beta_measure',
@@ -24,43 +27,37 @@ def compare_results(dict_path,out_dir,improveCheckModel=None):
             print("hello")
 
         bar_plot(df=df, metric_str=metric)
+        plt.savefig(os.path.join(out_dir,"figs", metric + ".png"))
 
-        # if improveCheckModel:
+        if improveCheckModel:
+            df = calc_diff(df=df, improveCheckModel=improveCheckModel)
+            bar_plot(df = df.filter(like='_diff', axis=1), metric_str=metric+"_diff")
+            plt.savefig(os.path.join(out_dir,"diff_figs", metric + "_diff.png"))
+        df.to_csv(os.path.join(out_dir,"csv", metric + ".csv"), index=False)
 
-        df.to_csv(os.path.join(out_dir, metric + ".csv"), index=False)
-        plt.savefig(os.path.join(out_dir,metric+".png"))
 
         # df.loc[df['original model + focal loss'] > df['original model'], "indicator"] = 1
         # bool_check = df.idxmax(axis=1) == "original model + focal loss"
         # idx = np.where(bool_check.to_numpy())[0]
     pass
 
-# def calc_diff(df,improveCheckModel):
-#     b = df.columns.to_list()
-#     b.remove(improvecheck)
+def calc_diff(df,improveCheckModel):
+    col_diff = df.columns.to_list()
+    col_diff.remove(improveCheckModel)
+
+    for col in col_diff:
+        df[col + "_diff"] = df[improveCheckModel] - df[col]
+        df.loc[df[col + "_diff"]>0 , col +"_indicator"] = 1
+
+    return df
+
 def bar_plot(df, metric_str):
-    labels = df.index
-
-    x = np.arange(len(labels))  # the label locations
-    width = 0.35  # the width of the bars
-
-    fig, ax = plt.subplots()
-
-    width_delta = [- width / 2, width / 2]
-    count = 0
-    for model_str in df.columns:
-        ax.bar(x + width_delta[count], df[model_str], width, label=model_str)
-        count = count+1
-
-    ax.set_ylabel(metric_str)
-    ax.set_ylabel("abnormalities")
-    ax.set_title(metric_str)
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.legend()
-
-    fig.tight_layout()
-    # plt.show()
+    df = df.copy()
+    df.plot.bar()
+    plt.grid(axis="y")
+    plt.ylabel(metric_str)
+    plt.xlabel("abnormalities")
+    plt.title(metric_str)
 
 
 if __name__ == '__main__':
@@ -69,5 +66,6 @@ if __name__ == '__main__':
         "/tcmldrive/project_dl/results/20220622-204757/": "original model + focal loss"
     }
     out_dir = "/tcmldrive/project_dl/results/compare_results"
-    compare_results(dict_path,out_dir)
+    improveCheckModel = "original model + focal loss"
+    compare_results(dict_path,out_dir,improveCheckModel)
     pass
