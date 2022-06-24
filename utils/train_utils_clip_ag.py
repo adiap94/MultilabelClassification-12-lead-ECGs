@@ -14,6 +14,7 @@ import math
 
 import models
 import dataset
+from loss.ASL_loss import AsymmetricLoss , AsymmetricLossOptimized
 from kornia.losses.focal import BinaryFocalLossWithLogits
 from utils.save import Save_Tool
 from utils.freeze import set_freeze_by_id
@@ -149,7 +150,10 @@ class train_utils(object):
             self.criterion  = BinaryFocalLossWithLogits(**kwargs)
         elif args.loss =="KL":
             self.criterion = nn.KLDivLoss(reduction="batchmean")
-
+        elif args.loss == "AsymmetricLoss":
+            self.criterion = AsymmetricLoss()
+        elif args.loss == "AsymmetricLossOptimized":
+            self.criterion = AsymmetricLossOptimized()
         #self.criterion = TverskyLoss()
         self.sigmoid = nn.Sigmoid()
         self.sigmoid.to(self.device)
@@ -164,7 +168,7 @@ class train_utils(object):
         if self.args.run_test:
             if epoch == self.args.max_epoch - 1 :
                 print("run test")
-                driver.main(self.args.workdir, gpu_num=self.args.gpu)
+                driver.main(self.args.workdir, gpu_num=self.args.gpu, only_eval_bool=False)
 
     def save_model_checkpoint(self):
 

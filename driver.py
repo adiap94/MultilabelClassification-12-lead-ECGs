@@ -96,15 +96,16 @@ def main(run_dir, only_eval_bool, gpu_num = "0"):
 
     all_class_analayze = np.array([sensitivity, specificity, precision, accuracy_all, auroc_all, auprc_all, f_measure_all, f_beta_all, g_all]).T
     all_class_analayze = pd.DataFrame(all_class_analayze, columns = ['sensitivity', 'specificity','precision', 'accuracy', 'auroc', 'auprc', 'f_measure', 'f_beta_measure', 'g_beta_measure'], index = classes)
-    all_class_analayze.to_csv(os.path.join(run_dir,"analyze_all_classes_2.csv"))
+    all_class_analayze['dx'] = all_class_analayze.index
+    all_class_analayze.to_csv(os.path.join(run_dir,"analyze_all_classes_2.csv"),index=False)
 
     eval_res = np.array([[auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric, np.nanmean(precision), np.nanmean(sensitivity), np.nanmean(specificity)]])
-    eval_res = pd.DataFrame(eval_res, columns = ['auroc', 'auprc', 'accuracy', 'f_measure', 'f_beta_measure', 'g_beta_measure', 'challenge_metric', 'precision', 'sensitivity', 'specificity'], index = classes)
-    eval_res.to_csv(os.path.join(run_dir,"metrics.csv"))
+    eval_res = pd.DataFrame(eval_res, columns = ['auroc', 'auprc', 'accuracy', 'f_measure', 'f_beta_measure', 'g_beta_measure', 'challenge_metric', 'precision', 'sensitivity', 'specificity'])
+    eval_res.to_csv(os.path.join(run_dir,"metrics.csv"),index=False)
 
     print('Done.')
 
 if __name__ == '__main__':
 
-    main(run_dir = "/tcmldrive/project_dl/results/20220623-201217", only_eval_bool = True)
+    main(run_dir = "/tcmldrive/project_dl/results/debug_mode/20220624-111149/", only_eval_bool = True)
     pass
