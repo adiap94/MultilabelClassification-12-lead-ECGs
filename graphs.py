@@ -21,7 +21,8 @@ def compare_results(dict_path,out_dir,improveCheckModel=None):
     for metric in metric_list:
         df = pd.DataFrame()
         for key, value in dict_path.items():
-            df_tmp = pd.read_csv(os.path.join(key,"analyze_all_classes.csv"))
+            df_tmp = pd.read_csv(os.path.join(key,"analyze_all_classes_2.csv"))
+            df_tmp = df_tmp.set_index(['dx'])
             if 'Unnamed: 0' in df_tmp:
                 df_tmp = df_tmp.drop(columns=['Unnamed: 0'])
             df[value] =df_tmp[metric]
@@ -72,14 +73,16 @@ def bar_plot(df, metric_str):
     plt.ylabel(metric_str)
     plt.xlabel("abnormalities")
     plt.title(metric_str)
-
+    plt.tight_layout()
 
 if __name__ == '__main__':
     dict_path = {
         "/tcmldrive/project_dl/results/restore": "original model",
-        "/tcmldrive/project_dl/results/20220623-201217/": "original model + focal loss"
+        # "/tcmldrive/project_dl/results/20220623-201217/": "original model + focal loss",
+        "/tcmldrive/project_dl/results/20220624-120955":"ASL"
     }
     out_dir = "/tcmldrive/project_dl/results/compare_results"
-    improveCheckModel = "original model + focal loss"
+    # improveCheckModel = "original model + focal loss"
+    improveCheckModel = "ASL"
     compare_results(dict_path,out_dir,improveCheckModel)
     pass
