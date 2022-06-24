@@ -14,6 +14,7 @@ import math
 
 import models
 import dataset
+
 from loss.ASL_loss import AsymmetricLoss , AsymmetricLossOptimized
 from kornia.losses.focal import BinaryFocalLossWithLogits
 from utils.save import Save_Tool
@@ -154,7 +155,12 @@ class train_utils(object):
             self.criterion = AsymmetricLoss()
         elif args.loss == "AsymmetricLossOptimized":
             self.criterion = AsymmetricLossOptimized()
-        #self.criterion = TverskyLoss()
+        elif args.loss == "WeightedMultilabel":
+            weights_df = pd.read_csv("weightsByRatio.csv")
+            weights = torch.FloatTensor(weights_df.weights.to_list())
+            weights = weights.to(self.device)
+            self.criterion =WeightedMultilabel(weights=weights)
+
         self.sigmoid = nn.Sigmoid()
         self.sigmoid.to(self.device)
         self.model.to(self.device)
