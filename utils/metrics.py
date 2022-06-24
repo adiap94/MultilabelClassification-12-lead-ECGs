@@ -110,7 +110,7 @@ def evaluate_12ECG_score(args, output_directory):#(label_directory, output_direc
     print('Done.')
 
     # Return the results.
-    return auroc, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices
+    return classes, auprc, auroc_all, auprc_all, accuracy, accuracy_all, f_measure, f_measure_all, f_beta_measure, f_beta_all, g_beta_measure, g_all, challenge_metric, confusion_matrices
 
 # Check if the input is a number.
 def is_number(x):
