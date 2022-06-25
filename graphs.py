@@ -13,10 +13,18 @@ def compare_results(dict_path,out_dir,improveCheckModel=None):
     os.chmod(os.path.join(out_dir,"figs"), mode=0o777)
     os.makedirs(os.path.join(out_dir,"csv"), exist_ok=True)
     os.chmod(os.path.join(out_dir,"csv"), mode=0o777)
+    os.makedirs(os.path.join(out_dir,"heatmap"), exist_ok=True)
+    os.chmod(os.path.join(out_dir,"heatmap"), mode=0o777)
+    os.makedirs(os.path.join(out_dir,"csvPerModel"), exist_ok=True)
+    os.chmod(os.path.join(out_dir,"csvPerModel"), mode=0o777)
     if improveCheckModel:
         df_check = pd.DataFrame()
     metric_list = ['sensitivity', 'specificity', 'precision', 'accuracy', 'auroc', 'auprc', 'f_measure', 'f_beta_measure',
      'g_beta_measure']
+
+    # compare metrics of all runs
+    df = compare_all_metrics(dict_path)
+    df.to_csv(os.path.join(out_dir, "csv", "all_metrics.csv"), index=False)
 
     for metric in metric_list:
         df = pd.DataFrame()
@@ -42,27 +50,56 @@ def compare_results(dict_path,out_dir,improveCheckModel=None):
         df.to_csv(os.path.join(out_dir,"csv", metric + ".csv"), index=False)
 
     if improveCheckModel:
-        df_check.to_csv(os.path.join(out_dir,"diff.csv"), index=False)
-        plt.figure()
-        sns.heatmap(df_check)
-        plt.savefig(os.path.join(out_dir,"diff_heatmap.png"))
-
-        df_check1 = df_check.copy()
-        df_check1[df_check1 < 0] = 0
-        df_check1[df_check > 0] = 1
-        plt.figure()
-        sns.heatmap(df_check1)
-        plt.savefig(os.path.join(out_dir,"diff_heatmap_binary.png"))
+        for model in improveCheckModel:
+            model_cols = [col for col in df_check.columns if model in col]
+            run_heatmap_per_model(df_check = df_check[model_cols], out_dir = out_dir, model_str=model)
 
     pass
 
-def calc_diff(df,improveCheckModel):
-    col_diff = df.columns.to_list()
-    col_diff.remove(improveCheckModel)
+def run_heatmap_per_model(df_check,out_dir,model_str):
+    df_check= df_check.copy()
+    mapping={}
+    # fix column names to have shorter name with metric only
+    for col in df_check.columns:
+        mapping[col] = col.split("_" + model_str + "_diff")[0]
+    df_check.rename(columns=mapping, inplace=True)
 
-    for col in col_diff:
-        df[col + "_diff"] = df[improveCheckModel] - df[col]
-        df.loc[df[col + "_diff"]>0 , col +"_indicator"] = 1
+    df_check.to_csv(os.path.join(out_dir,"csvPerModel", model_str+"_diff.csv"), index=False)
+    plt.figure()
+    sns.heatmap(df_check)
+    plt.title(model_str+" diff")
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir,"heatmap", "DiffHeatmap_"+model_str+".png"))
+
+    df_check1 = df_check.copy()
+    df_check1[df_check1 < 0] = 0
+    df_check1[df_check > 0] = 1
+    plt.figure()
+    sns.heatmap(df_check1)
+    plt.title(model_str + " diff")
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir,"heatmap", "BinaryDiffHeatmap_"+model_str+".png"))
+
+def compare_all_metrics(dict_path):
+    df = pd.DataFrame()
+    for key, value in dict_path.items():
+        df_tmp = pd.read_csv(os.path.join(key, "metrics.csv"))
+        df_tmp = df_tmp.set_index([pd.Index([value])])
+        df = pd.concat([df, df_tmp], axis=0)
+    df = df.reset_index(col_fill='Model')
+    df = df.reset_index()
+    df.rename(columns={"index": "model"}, inplace=True)
+
+    return df
+
+def calc_diff(df,improveCheckModel):
+    cols = df.columns.to_list()
+    col_diff = [fruit for fruit in cols if fruit not in improveCheckModel][0]
+    # col_diff.remove(improveCheckModel)
+
+    for model in improveCheckModel:
+        df[model + "_diff"] =  df[model] - df[col_diff]
+        df.loc[df[model + "_diff"]>0 , model +"_indicator"] = 1
 
     return df
 
@@ -77,12 +114,12 @@ def bar_plot(df, metric_str):
 
 if __name__ == '__main__':
     dict_path = {
-        "/tcmldrive/project_dl/results/restore": "original model",
-        # "/tcmldrive/project_dl/results/20220623-201217/": "original model + focal loss",
-        "/tcmldrive/project_dl/results/20220624-120955":"ASL"
+        "/tcmldrive/project_dl/results/restore": "BCE loss",
+        "/tcmldrive/project_dl/results/20220623-201217/": "Focal loss",
+        "/tcmldrive/project_dl/results/20220624-120955":"ASL loss",
+        "/tcmldrive/project_dl/results/20220624-181009": "Weighted BCE loss"
     }
     out_dir = "/tcmldrive/project_dl/results/compare_results"
-    # improveCheckModel = "original model + focal loss"
-    improveCheckModel = "ASL"
+    improveCheckModel = ["Focal loss","ASL loss","Weighted BCE loss"]
     compare_results(dict_path,out_dir,improveCheckModel)
     pass
