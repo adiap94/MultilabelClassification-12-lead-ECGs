@@ -6,6 +6,7 @@ df_sum = df.groupby(["set"])['10370003','111975006', '164889003', '164890007', '
          '427172004', '427393009', '445118002', '47665007', '59931005',
                              '698252002', '713426002', '713427006'].sum()
 a = df_sum.sum()
+a= 1/a
 a_ratio = a/a.min()
 df_ratio = a_ratio.to_frame("weights")
 df_ratio["dx"]=df_ratio.index
